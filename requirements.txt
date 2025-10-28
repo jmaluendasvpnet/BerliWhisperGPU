@@ -1,0 +1,14 @@
+# Servidor web ligero
+Flask
+waitress
+
+# IA: Transcripción
+faster-whisper
+# ctranslate2 será instalado por faster-whisper
+
+# Dependencia GPU (PyTorch)
+# Se instala manualmente
+
+# Utilidades
+requests # Si necesita llamar a algo más
+numpy
