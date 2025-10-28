@@ -1,0 +1,12 @@
+# Entorno virtual
+venv_whisper/
+
+# Modelos OCR grandes
+paddleocr_models/
+
+# Archivos temporales
+__pycache__/
+*.pyc
+*.pyo
+*.log
+celerybeat-schedule.*
