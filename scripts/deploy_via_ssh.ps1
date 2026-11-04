@@ -58,7 +58,9 @@ git checkout main
 git reset --hard origin/main
 echo COMMIT:`$(git log -1 --oneline)
 if command -v fuser >/dev/null 2>&1; then fuser -k 3108/tcp >/dev/null 2>&1 || true; fi
-pkill -f /home/berlia/Documentos/BerliONE/BerliWhisperGPU/app.py >/dev/null 2>&1 || true
+ps -eo pid,cmd | grep 'env_whisper/bin/python' | grep 'app.py' | grep -v bash | grep -v grep | awk '{print `$1}' | while read -r wpid; do
+  kill "`$wpid" >/dev/null 2>&1 || true
+done
 sleep 1
 nohup ./env_whisper/bin/python app.py >>/tmp/berliwhisper.log 2>&1 &
 echo STARTED
