@@ -71,7 +71,7 @@ for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
 done
 if [ -z "`$ok" ]; then echo HEALTH_FAIL; tail -n 30 /tmp/berliwhisper.log; exit 1; fi
 echo HEALTH_OK
-ps -eo pid,ppid,cmd | grep BerliWhisperGPU | grep -v grep
+ps -eo pid,ppid,cmd | grep BerliWhisperGPU | grep -v grep || true
 "@
 $remote = $remote -replace "`r", ""
 try {
