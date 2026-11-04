@@ -10,28 +10,26 @@ try:
 except Exception as e:
     WHISPER_MODEL = "ERROR"
 
+_ALLOWED_EXT = {"ogg", "oga", "opus", "mp3", "wav", "m4a", "webm", "mp4", "mpeg", "aac"}
+
+
 def run_transcription_internal(audio_data: bytes, file_extension: str):
-    if WHISPER_MODEL == "ERROR":
+    if WHISPER_MODEL == "ERROR" or WHISPER_MODEL is None:
         raise Exception("Modelo Whisper no cargo.")
-    if WHISPER_MODEL is None:
-         raise Exception("Modelo Whisper con error.")
-
+    if not audio_data or len(audio_data) < 256:
+        raise ValueError("Audio vacio o demasiado pequeno")
+    ext = (file_extension or "ogg").lower().rsplit(".", 1)[-1]
+    if ext not in _ALLOWED_EXT:
+        ext = "ogg"
+    temp_path = os.path.join(tempfile.gettempdir(), f"{uuid.uuid4()}.{ext}")
     try:
-        unique_filename = f"{uuid.uuid4()}.{file_extension}"
-        temp_path = os.path.join(tempfile.gettempdir(), unique_filename)
-
-        with open(temp_path, 'wb') as f:
+        with open(temp_path, "wb") as f:
             f.write(audio_data)
-
-        if not os.path.exists(temp_path) or os.path.getsize(temp_path) == 0:
-            return None
-
-        segments, _ = WHISPER_MODEL.transcribe(temp_path, language='es')
-        transcription = "".join(segment.text for segment in segments)
-
+        try:
+            segments, _ = WHISPER_MODEL.transcribe(temp_path, language="es")
+        except (IndexError, OSError, RuntimeError, ValueError) as exc:
+            raise ValueError("Audio no decodificable") from exc
+        return "".join(segment.text for segment in segments).strip()
+    finally:
         if os.path.exists(temp_path):
             os.remove(temp_path)
-
-        return transcription.strip()
-    except Exception as e:
-        raise e

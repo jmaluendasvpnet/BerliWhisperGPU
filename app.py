@@ -7,6 +7,14 @@ app = Flask(__name__)
 
 INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "JMalu-BerliDATA")
 
+@app.route('/health', methods=['GET'])
+def health():
+    from processing_whisper import WHISPER_MODEL
+    if WHISPER_MODEL in ("ERROR", None):
+        return jsonify({'status': 'error', 'service': 'berli_whisper'}), 503
+    return jsonify({'status': 'ok', 'service': 'berli_whisper'})
+
+
 @app.route('/api/v1/process/transcribe', methods=['POST'])
 def transcribe_api_flask():
     api_key = request.headers.get('X-Internal-API-Key')
@@ -25,12 +33,15 @@ def transcribe_api_flask():
 
         return jsonify({'transcription': transcription, 'status': 'ok'})
 
+    except ValueError as e:
+        print(f"Audio rechazado: {e}")
+        return jsonify({'error': str(e)}), 422
     except Exception as e:
         print(f"Error vista transcribe_api_flask: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     host = '0.0.0.0'
-    port = 3109
+    port = int(os.environ.get('PORT', '3108'))
     print(f"Iniciando servidor Whisper en http://{host}:{port}")
     serve(app, host=host, port=port)
